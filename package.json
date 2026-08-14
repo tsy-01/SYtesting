@@ -20,6 +20,7 @@
   "homepage": "https://github.com/tsy-01/SYtesting#readme",
   "dependencies": {
     "dotenv": "^17.4.2",
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "xlsx": "^0.18.5"
   }
 }

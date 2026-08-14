@@ -1,0 +1,460 @@
+<title>Normal Flow Bet Ledger</title>
+<style>
+  :root {
+    --bg: #f3f4f1;
+    --surface: #ffffff;
+    --surface-2: #eceee9;
+    --ink: #1e231e;
+    --muted: #626b5f;
+    --faint: #9aa294;
+    --line: #dcdfd6;
+    --accent: #2b6a72;
+    --accent-ink: #ffffff;
+    --pass-bg: #e3efe1;
+    --pass-ink: #2f6b3a;
+    --pass-line: #b9d6b4;
+    --skip-bg: #f2ecda;
+    --skip-ink: #8a6d1f;
+    --skip-line: #e0d3a3;
+    --shadow: 0 1px 2px rgba(30,35,30,0.06), 0 8px 24px -12px rgba(30,35,30,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141712;
+      --surface: #1b201a;
+      --surface-2: #232921;
+      --ink: #e9ece6;
+      --muted: #a3ab9c;
+      --faint: #6c756a;
+      --line: #303830;
+      --accent: #6fb3ba;
+      --accent-ink: #0e1512;
+      --pass-bg: #1c2c1f;
+      --pass-ink: #8fce97;
+      --pass-line: #2e4633;
+      --skip-bg: #2c2716;
+      --skip-ink: #dcc274;
+      --skip-line: #4a3f22;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #141712;
+    --surface: #1b201a;
+    --surface-2: #232921;
+    --ink: #e9ece6;
+    --muted: #a3ab9c;
+    --faint: #6c756a;
+    --line: #303830;
+    --accent: #6fb3ba;
+    --accent-ink: #0e1512;
+    --pass-bg: #1c2c1f;
+    --pass-ink: #8fce97;
+    --pass-line: #2e4633;
+    --skip-bg: #2c2716;
+    --skip-ink: #dcc274;
+    --skip-line: #4a3f22;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sheet {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 48px 28px 80px;
+  }
+
+  h1, h2, h3 {
+    font-family: Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    text-wrap: balance;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    padding: 28px 30px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .masthead::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent);
+  }
+  .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .masthead h1 {
+    font-size: 1.9rem;
+    letter-spacing: -0.01em;
+  }
+  .masthead .sub {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 0.98rem;
+  }
+  .meta-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line);
+  }
+  .meta-item .k {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 3px;
+  }
+  .meta-item .v {
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ---- Summary strip ---- */
+  .summary {
+    display: flex;
+    gap: 12px;
+    margin: 22px 0 40px;
+    flex-wrap: wrap;
+  }
+  .summary .stat {
+    flex: 1 1 140px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .summary .stat .num {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 1.7rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .summary .stat .num.pass { color: var(--pass-ink); }
+  .summary .stat .num.skip { color: var(--skip-ink); }
+  .summary .stat .label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ---- Section ---- */
+  section.block {
+    margin-top: 20px;
+  }
+  .section-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 700;
+    margin: 36px 0 12px;
+  }
+
+  /* ---- Test card ---- */
+  .test {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .test-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .test-head h3 {
+    font-size: 1.15rem;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .pill.pass { background: var(--pass-bg); color: var(--pass-ink); border-color: var(--pass-line); }
+  .pill.skip { background: var(--skip-bg); color: var(--skip-ink); border-color: var(--skip-line); }
+  .pill::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .kv {
+    display: grid;
+    grid-template-columns: minmax(140px, auto) 1fr;
+    gap: 7px 16px;
+    margin: 16px 0 4px;
+    font-size: 0.93rem;
+  }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; color: var(--ink); }
+  .kv dd.result { color: var(--ink); font-style: italic; }
+
+  .note {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-size: 0.93rem;
+    color: var(--muted);
+  }
+  .note strong { color: var(--ink); }
+
+  /* ---- Tables ---- */
+  .table-wrap {
+    overflow-x: auto;
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 480px;
+    font-size: 0.88rem;
+  }
+  thead th {
+    text-align: left;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    font-weight: 700;
+    background: var(--surface-2);
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
+  td.status-lose { color: var(--muted); }
+  tfoot td {
+    padding: 10px 14px;
+    font-weight: 700;
+    background: var(--surface-2);
+    border-top: 1px solid var(--line);
+  }
+
+  /* ---- Skipped list ---- */
+  ul.skipped {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  ul.skipped li {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--skip-line);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 0.92rem;
+    color: var(--muted);
+  }
+  ul.skipped li strong { color: var(--ink); }
+
+  /* ---- Notes ---- */
+  ul.notes {
+    margin: 0; padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  ul.notes li {
+    position: relative;
+    padding-left: 20px;
+    font-size: 0.93rem;
+    color: var(--muted);
+  }
+  ul.notes li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  ul.notes li strong { color: var(--ink); }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--line);
+    font-size: 0.8rem;
+    color: var(--faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 520px) {
+    .sheet { padding: 28px 16px 60px; }
+    .masthead { padding: 22px 18px 20px; }
+    .kv { grid-template-columns: 1fr; }
+    .kv dt { margin-top: 6px; }
+  }
+</style>
+
+<div class="sheet">
+
+  <div class="masthead">
+    <div class="eyebrow">SYtesting &middot; QA Session Report</div>
+    <h1>Play Game Normal Flow</h1>
+    <div class="sub">Insufficient-balance and within-balance bet checks, run live against staging.</div>
+    <div class="meta-strip">
+      <div class="meta-item"><div class="k">Date</div><div class="v">2026-08-14</div></div>
+      <div class="meta-item"><div class="k">Player</div><div class="v mono">symyr0814a</div></div>
+      <div class="meta-item"><div class="k">Currency</div><div class="v">MYR</div></div>
+      <div class="meta-item"><div class="k">Game</div><div class="v">Little Mermaid</div></div>
+      <div class="meta-item"><div class="k">Vendor</div><div class="v">AI Gaming</div></div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="stat"><div class="num pass">3/3</div><div class="label">Tests passed</div></div>
+    <div class="stat"><div class="num skip">2</div><div class="label">Checks skipped</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">Systems cross&#8209;checked</div></div>
+  </div>
+
+  <div class="section-label">Tests</div>
+
+  <div class="test">
+    <div class="test-head">
+      <h3>1. Over-balance bet rejected</h3>
+      <span class="pill pass">Pass</span>
+    </div>
+    <dl class="kv">
+      <dt>Balance before</dt><dd class="mono">5.00 MYR</dd>
+      <dt>Bet attempted</dt><dd class="mono">RM 7.50 (&gt; balance)</dd>
+      <dt>Game response</dt><dd class="result">&ldquo;Not enough balance.&rdquo;</dd>
+      <dt>MyBets</dt><dd>No record created</dd>
+      <dt>Statement</dt><dd>Running total unchanged at 5.00 &middot; Win/Loss 0.00 &middot; Commission 0.00</dd>
+      <dt>BO balance</dt><dd class="mono">Unchanged at 5.00 MYR</dd>
+    </dl>
+  </div>
+
+  <div class="test">
+    <div class="test-head">
+      <h3>2. Bet within balance, three rounds</h3>
+      <span class="pill pass">Pass</span>
+    </div>
+    <dl class="kv">
+      <dt>Stake per bet</dt><dd class="mono">RM 1.50 &times; 3</dd>
+      <dt>Balance after</dt><dd class="mono">0.54 MYR</dd>
+      <dt>Statement totals</dt><dd>Stake 4.50 &middot; Valid bet 4.50 &middot; Win/Loss &minus;4.50 &middot; Commission 0.04</dd>
+    </dl>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Ticket</th><th>Round</th><th class="num">Stake</th><th>Status</th><th class="num">Win/Loss</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">AIG_448687</td><td class="mono">...219141572</td><td class="num">1.50</td><td class="status-lose">Lose</td><td class="num">&minus;1.50</td></tr>
+          <tr><td class="mono">AIG_448688</td><td class="mono">...219189320</td><td class="num">1.50</td><td class="status-lose">Lose</td><td class="num">&minus;1.50</td></tr>
+          <tr><td class="mono">AIG_448689</td><td class="mono">...219213917</td><td class="num">1.50</td><td class="status-lose">Lose</td><td class="num">&minus;1.50</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="2">Total</td><td class="num">4.50</td><td></td><td class="num">&minus;4.50</td></tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="note">
+      <strong>Cross-checked in four systems</strong> &mdash; all consistent with the playsite statement above.
+    </div>
+    <div class="table-wrap" style="margin-top:10px;">
+      <table>
+        <thead>
+          <tr><th>System</th><th>Reading</th><th class="num">Match</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>BO Search Ticket <span class="mono" style="color:var(--faint)">(by RoundId)</span></td><td>AIG_448689 &middot; Little Mermaid &middot; Lose &middot; &minus;1.50</td><td class="num">✓</td></tr>
+          <tr><td>BO Reports &rsaquo; Win Lose Simple</td><td>Turnover 4.50 &middot; Comm 0.04 &middot; Payout &minus;4.45</td><td class="num">✓</td></tr>
+          <tr><td>BO Reports &rsaquo; Member Statement</td><td>Bet &minus;4.50 &middot; Comm 0.04 &middot; Running total 0.54</td><td class="num">✓</td></tr>
+          <tr><td>BO List Cash Member</td><td>Balance 0.54 MYR</td><td class="num">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="test">
+    <div class="test-head">
+      <h3>3. Over-balance bet rejected again</h3>
+      <span class="pill pass">Pass</span>
+    </div>
+    <dl class="kv">
+      <dt>Balance</dt><dd class="mono">0.54 MYR</dd>
+      <dt>Game response</dt><dd class="result">&ldquo;Not enough balance.&rdquo; shown again, correctly</dd>
+    </dl>
+  </div>
+
+  <div class="section-label">Skipped</div>
+  <ul class="skipped">
+    <li><strong>0011 &middot; Auto-spin until balance runs out</strong> &mdash; not run as a dedicated test; the balance draw-down in Test&nbsp;2 covered the same ground via three manual bets, by request.</li>
+    <li><strong>BO total bet outstanding / member account &ldquo;today&rsquo;s date&rdquo; field</strong> &mdash; skipped by request.</li>
+  </ul>
+
+  <div class="section-label">Notes &amp; quirks</div>
+  <ul class="notes">
+    <li><strong>Member Statement date range:</strong> returns zero rows when From = To = today. Set From to the previous day to see today&rsquo;s activity with a correct running total &mdash; not a missing-data bug.</li>
+    <li><strong>Search Ticket</strong> requires either a Ticket Number or a RoundId; UserId alone isn&rsquo;t sufficient to search.</li>
+    <li><strong>Little Mermaid load stall:</strong> the AI Gaming iframe intermittently stuck around 97% loading; a manual refresh resolved it each time.</li>
+  </ul>
+
+  <footer>
+    <span>Reference: Testpad #10059 &ldquo;V2 Normal Flow&rdquo; (used as a sample checklist only)</span>
+    <span>stage-mem.linkv2.com &middot; stage-bo.linkv2.com</span>
+  </footer>
+
+</div>
